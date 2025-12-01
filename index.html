@@ -206,6 +206,9 @@
             <img src="malamute-alaskan.gif" alt="Malamute Alaskan">
         </div>
         <div class="gif-slide">
+            <img src="dog-fall-on-face-snow-sled.gif" alt="Dog Fall on Face Snow Sled">
+        </div>
+        <div class="gif-slide">
             <img src="melon.gif" alt="Melon">
         </div>
     </div>
@@ -242,10 +245,29 @@
         const notification = document.getElementById('notification');
         const slides = document.querySelectorAll('.gif-slide');
 
-        // TV slideshow - randomized order
-        let slideOrder = Array.from({length: slides.length}, (_, i) => i);
+        // TV slideshow - specific order: dogfall, malamute-alaskan, dog-fall-on-face-snow-sled, then random, melon last
+        // Map GIF filenames to indices
+        const gifMap = {};
+        slides.forEach((slide, index) => {
+            const img = slide.querySelector('img');
+            if (img) {
+                const filename = img.src.split('/').pop();
+                gifMap[filename] = index;
+            }
+        });
         
-        // Shuffle the array for random order
+        // Build the order: dogfall (3), malamute-alaskan (7), dog-fall-on-face-snow-sled (9), random middle, melon (8) last
+        const dogfallIndex = gifMap['dogfall.gif'];
+        const malamuteAlaskanIndex = gifMap['malamute-alaskan.gif'];
+        const dogFallSnowSledIndex = gifMap['dog-fall-on-face-snow-sled.gif'];
+        const melonIndex = gifMap['melon.gif'];
+        
+        // Get all other indices (excluding the fixed ones)
+        const allIndices = Array.from({length: slides.length}, (_, i) => i);
+        const fixedIndices = [dogfallIndex, malamuteAlaskanIndex, dogFallSnowSledIndex, melonIndex];
+        const middleIndices = allIndices.filter(i => !fixedIndices.includes(i));
+        
+        // Shuffle the middle indices
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -254,7 +276,11 @@
             return array;
         }
         
-        slideOrder = shuffleArray(slideOrder);
+        const shuffledMiddle = shuffleArray([...middleIndices]);
+        
+        // Build final order: [dogfall, malamute-alaskan, dog-fall-on-face-snow-sled, ...shuffled middle..., melon]
+        const slideOrder = [dogfallIndex, malamuteAlaskanIndex, dogFallSnowSledIndex, ...shuffledMiddle, melonIndex];
+        
         let currentIndex = 0;
         let currentSlide = slideOrder[currentIndex];
         
